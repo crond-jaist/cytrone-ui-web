@@ -1,0 +1,62 @@
+The Protocol between UI and Door over WebSocket
+
+
+1. Charactor of This Protocol
+
+This protocol is asynchronous and asymmetry.
+"asynchronous" means that several commands run concurrently.
+Because many trainings often run in same time.
+"asymmetry" means some commands does not required acknowledgements.
+
+
+1.1. Note of This Document
+
+Some protocol syntax and examples are appeard in this document.
+"U" means UI, in most case it is WWW browser.
+"D" means door, UI server.
+
+2. Handshake
+
+D:  HELO
+U:  HELO-ACK
+
+D:  SYSID <sysid>
+
+
+3.  Traning Controll
+
+U:  RUN START <id> <TSL>
+D:  RUN START-ACK <id> <trngsrv's-response-JSON>
+
+U:  RUN STOP <id> <range-id>
+D:  RUN STOP-ACK <id> <trngsrv's-response-JSON>
+
+
+4.  Sessions (Active Training)
+
+U:  ACLIST
+D:  ACLIST CONT <trngsrv's-response-JSON>
+
+D:  ACLIST ADD <id> <label>
+D:  ACLIST DEL <id>
+    
+5. Training Database
+
+U:  TRLIST
+D:  TRLIST CONT <trngsrv's-response-JSON>
+
+D:  TRLIST ADD <id> <label>
+D:  TRLIST DEL <id>
+
+9. Others
+
+D:  PING
+U:  PONG
+
+U:  PING
+D:  PONG
+
+D:  TIME
+D:  NOP
+
+

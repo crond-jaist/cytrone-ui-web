@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<!-- by k-chinen, CROND, JAIST -->
+<html>
+<head>
+    <meta charset="UTF-8">
+  <script type="text/javascript">
+    function xlayouthori() {
+        return layouthori();
+    }
+    function xlayoutvert() {
+        return layoutvert();
+    }
+    function xacstop() {
+        return acstop();
+    }
+    function xacclear() {
+        return acclear();
+    }
+    function xacaddrun() {
+        return acaddrun("foo");
+    }
+    function xacupdate() {
+        return acupdate();
+    }
+    function xacrefresh() {
+        return acrefresh();
+    }
+    function xacmarkall() {
+        return acmarkall();
+    }
+    function xacunmarkall() {
+        return acunmarkall();
+    }
+    function xactogglemark() {
+        return actogglemark();
+    }
+    function xacidsort() {
+        return acidsort();
+    }
+    function xacnamesort() {
+        return acnamesort();
+    }
+
+
+    function xtrrun() {
+        return trrun();
+    }
+    function xtrdel() {
+        return trdel();
+    }
+    function xtradd() {
+        return tradd();
+    }
+    function xtrupload() {
+        return trupload();
+    }
+    function xtrdownload() {
+        return trdownload();
+    }
+    function xtrclear() {
+        return trclear();
+    }
+    function xtrupdate() {
+        return trupdate();
+    }
+    function xtrrefresh() {
+        return trrefresh();
+    }
+
+
+    function xtrmarkall() {
+        return trmarkall();
+    }
+    function xtrunmarkall() {
+        return trunmarkall();
+    }
+    function xtrtogglemark() {
+        return trtogglemark();
+    }
+    function xtridsort() {
+        return tridsort();
+    }
+    function xtrnamesort() {
+        return trnamesort();
+    }
+    function xtest1() {
+        return test1();
+    }
+    function xtest2() {
+        return test2();
+    }
+
+  </script>
+</head>
+<body>
+  <div class="title"><font size="+3">CyTrONE Door</font> JAIST CROND</div>
+
+ <div>
+  <button onclick="xlayoutvert()">Vertical Layout</button>
+  <button onclick="xlayouthori()">Horizontal Layout</button>
+<!--
+  <button onclick="xtest1()">test1</button>
+  <button onclick="xtest2()">test2</button>
+-->
+ </div>
+
+  <table id="heart" cellpadding="0px" cellspacing="0px">
+  <tr>
+  <td>
+   <table id="acbase" frame="box" cellpadding="4px" cellspacing="0px">
+    <tr><th>
+    Active Sessions
+    <tr><td>
+    <button onclick="xacstop()"     >End</button>
+<!--
+    <button onclick="xacaddrun()"   >**addrun</button>
+    <button onclick="xacclear()"    >clear</button>
+    <button onclick="xacupdate()"   >update</button>
+-->
+    <button onclick="xacrefresh()"  >Refresh</button>
+    <tr><td>
+    <table id="aclist" bgcolor="#ccffcc" cellpadding="2" cellspacing="0">
+     <tr bgcolor="#ccccff">
+      <th><input type="checkbox" onclick="xactogglemark()" name="acall" /></th>
+      <th onclick="xacidsort()">ID</th>
+      <th onclick="xacnamesort()">Description</th>
+      <th onclick="xacnamesort()">Instances</th>
+      <th onclick="xacnamesort()">Creation Time</th>
+     </tr>
+    </table>
+    <div id="msgline" style="color: red;" />
+   </table>
+
+   &nbsp;
+
+   <table id="trbase" frame="box" cellpadding="4px" cellspacing="0px">
+    <tr><th>
+    Training Database
+    <tr><td>
+    <button onclick="xtrrun()"      >Create</button>
+<!--
+    <button onclick="xtrdel()"      >del*</button>
+    <button onclick="xtradd()"      >add*</button>
+    <button onclick="xtrupload()"   >upload*</button>
+    <button onclick="xtrdownload()" >download*</button>
+    <button onclick="xtrclear()"    >clear*</button>
+    <button onclick="xtrupdate()"   >update</button>
+-->
+    <button onclick="xtrrefresh()"  >Refresh</button>
+    <tr><td>
+    <table id="trlist" bgcolor="#ccffcc" cellpadding="2" cellspacing="0">
+     <tr bgcolor="#ccccff">
+      <th><input type="checkbox" onclick="xtrtogglemark()" name="trall" /></th>
+<!--
+      <th onclick="xtridsort()">id</th>
+      <th onclick="xtrnamesort()">name</th>
+-->
+      <th onclick="xtrnamesort()" colspan="3">Name</th>
+     </tr>
+    </table>
+   </table>
+
+  </td>
+  </tr>
+  </table>
+
+  <div id="sentinel">FirstAccess</div>
+
+  <script type="text/javascript">
+    var debug = 1;
+    var cmdsep = " ";
+    var sep = ";";
+    var ws = null;
+//      var periodtick = 5*60*1000; /* 5min */
+    var periodtick = 10*1000;   /* 10sec */
+
+    var psep = "|";
+
+    console.log("np starting...");
+
+    var tobj = document.getElementById("sentinel");
+
+    function tmphash(is) {
+        var ps = is.split("");
+        var os = 0;
+        var i  = 1;
+        ps.forEach(
+            function(x) {
+//console.log("  x <"+x.charCodeAt(0)+">");
+                i++;
+                os = os+x.charCodeAt(0)*i;
+            }
+        );
+//console.log("os "+os);
+        return os;
+    }
+
+    function msgupdate(msgcont) {
+        var msgpos = document.getElementById("msgline");
+        msgpos.innerHTML = msgcont;
+    }
+
+    function layouthori() {
+        console.log("layout horizontal");
+        var xal = document.getElementById("acbase");
+        var xtr = document.getElementById("trbase");
+        xal.setAttribute("align", "left");
+        xtr.setAttribute("align", "right");
+    }
+    function layoutvert() {
+        console.log("layout vertical");
+        var xal = document.getElementById("acbase");
+        var xtr = document.getElementById("trbase");
+        xal.setAttribute("align", "");
+        xtr.setAttribute("align", "");
+    }
+
+    function acmarkall() {
+        console.log("acmarkall");
+        var boxes = document.getElementsByName("acitem");
+        var e;
+        for(var i=0; i< boxes.length; i++) {
+            e = boxes.item(i);
+            e.checked = true;
+        }
+    }
+
+    function acunmarkall() {
+        console.log("acmarkall");
+        var boxes = document.getElementsByName("acitem");
+        var e;
+        for(var i=0; i< boxes.length; i++) {
+            e = boxes.item(i);
+            e.checked = false;
+        }
+    }
+    
+    function actogglemark() {
+        var boxes = document.getElementsByName("acall");
+        var e = boxes.item(0);
+        if(e.checked) {
+            acmarkall();
+        }
+        else {
+            acunmarkall();
+        }
+    }
+
+    function trmarkall() {
+        console.log("trmarkall");
+        var boxes = document.getElementsByName("tritem");
+        var e;
+        for(var i=0; i< boxes.length; i++) {
+            e = boxes.item(i);
+            e.checked = true;
+        }
+    }
+
+    function trunmarkall() {
+        console.log("trmarkall");
+        var boxes = document.getElementsByName("tritem");
+        var e;
+        for(var i=0; i< boxes.length; i++) {
+            e = boxes.item(i);
+            e.checked = false;
+        }
+    }
+    
+    function trtogglemark() {
+        var boxes = document.getElementsByName("trall");
+        var e = boxes.item(0);
+        if(e.checked) {
+            trmarkall();
+        }
+        else {
+            trunmarkall();
+        }
+    }
+
+    function acidsort() {
+        console.log("acidsort");
+    }
+
+    function tridsort() {
+        console.log("tridsort");
+    }
+
+    function acnamesort() {
+        console.log("acnamesort");
+    }
+
+    function trnamesort() {
+        console.log("trnamesort");
+    }
+
+    function acstop() {
+        console.log("acstop");
+        var boxes = document.getElementsByName("acitem");
+        var e;
+        var ids;
+        ids = [];
+        for(var i=0; i< boxes.length; i++) {
+            e = boxes.item(i);
+            if(e.checked) {
+                ids.push(e.value);
+            }
+        }
+        console.log("ids ["+ids.join(":")+"]");
+        
+        ids.forEach(
+            function(x) {
+                console.log("  id <"+x+">");
+                ws.send("RUN STOP -1 "+x);
+            }
+        );
+    }
+
+    function acdelifexistrnrow(qid) {
+        console.log("acdelifexist");
+        var aclist = document.getElementById('aclist');
+        var rows = aclist.rows;
+        var c=0;
+console.log("  rows.length "+rows.length);
+        for(var i=rows.length-1;i>=0;i--) {
+            if(rows[i].getAttribute('name')=='rnrow' &&
+               rows[i].getAttribute('id')  ==qid) {
+console.log("  delete "+i+" th");
+                aclist.deleteRow(i);
+                c++;
+            }
+        }
+        if(c>0) {
+            console.log("MAYBE deleted");
+        }
+    }
+
+
+    function acclear() {
+        console.log("acclear");
+        var aclist = document.getElementById('aclist');
+        var rows = aclist.rows;
+        var c=0;
+console.log("  rows.length "+rows.length);
+        for(var i=rows.length-1;i>=0;i--) {
+            if(rows[i].getAttribute('name')=='acrow') {
+console.log("  delete "+i+" th");
+                aclist.deleteRow(i);
+                c++;
+            }
+        }
+        if(c>0) {
+            console.log("MAYBE deleted");
+        }
+    }
+
+    function _trgatherall() {
+        console.log("_trgatherall");
+        var boxes = document.getElementsByName("tritem");
+        var e;
+        var ids;
+        ids = [];
+        for(var i=0; i< boxes.length; i++) {
+            e = boxes.item(i);
+            ids.push(e.value);
+        }
+        console.log("ids ["+ids.join(":")+"]");
+        return ids;
+    }
+
+    function _trgathertarget() {
+        console.log("_trgathertarget");
+        var boxes = document.getElementsByName("tritem");
+        var e;
+        var ids;
+        ids = [];
+        for(var i=0; i< boxes.length; i++) {
+            e = boxes.item(i);
+            if(e.checked) {
+                ids.push(e.value);
+            }
+        }
+        console.log("ids ["+ids.join(":")+"]");
+        return ids;
+    }
+
+    function _trgathertargetTSL() {
+        console.log("_trgathertargetTSL");
+        var boxes = document.getElementsByName("tritem");
+        var e;
+        var ids;
+        ids = [];
+        for(var i=0; i< boxes.length; i++) {
+            e = boxes.item(i);
+            if(e.checked) {
+                ids.push(e.value);
+            }
+        }
+        console.log("ids ["+ids.join(":")+"]");
+
+        var tups = [];
+        for(pos in ids) {
+            var id = ids[pos];
+            var lbtr = document.getElementById(id);
+            if(lbtr) {
+                var lbtrchs = lbtr.childNodes;
+                lbtrchs.forEach(
+                    function(x) {
+                        if( x.getAttribute("name") == "trlabel") {
+                            console.log("  raw <"+x.innerHTML+">");
+//                              tups.push(x.innerHTML);
+                            tups.push(x.getAttribute("xurl"));
+                        }
+                    }
+                );
+            }
+            else {
+                console.log("  not found '"+id+"'");
+            }
+        }
+
+        return tups;
+    }
+
+    function acaddrun(rid) {
+        console.log("accadrun <"+rid+">");
+        var aclist;
+        var newtr;
+        var newtd;
+        aclist = document.getElementById('aclist');
+        newtr = aclist.insertRow(-1);
+        newtr.setAttribute("id", rid);
+        newtr.setAttribute("name", "rnrow");
+        newtd = newtr.insertCell(-1);
+        newtd.innerHTML = "<input type=\"checkbox\" name=\"acitem\""+
+            "value=\""+rid+"\" />";
+        newtd = newtr.insertCell(-1);
+        newtd.innerHTML = rid;
+        newtd = newtr.insertCell(-1);
+        newtd.innerHTML = "just starting...";
+    }
+
+    var ridseq=4071;
+    function _trrunX(tup, cc) {
+        var entup = encodeURIComponent(tup);
+        console.log("_trrunX with +'"+entup+"'");
+        ridseq++;
+        var rid="rn"+ridseq;
+        acaddrun(rid);
+        ws.send("RUN START "+rid+" "+entup+" "+cc);
+    }
+
+    function trrun() {
+        console.log("trrun");
+
+        var cc=prompt("How many instance ?", "1");
+
+        if(!cc) return;
+
+        var ids = _trgathertarget();
+        ids.forEach(
+            function(x) {
+                console.log(" run? <"+x+">");
+            }
+        );
+
+        var ids = _trgathertargetTSL();
+        ids.forEach(
+            function(x) {
+                console.log(" run with? <"+x+">");
+                _trrunX(x, cc);
+            }
+        );
+    }
+
+
+    function trdel() {
+        console.log("trdel");
+        var ids = _trgathertarget();
+        ids.forEach(
+            function(x) {
+                console.log(" del? <"+x+">");
+                if(x.match(/^tr\d+/)) {
+                    console.log(" skip it is trngsrv's training");
+                }
+                else {
+                    console.log(" try that");
+                }
+            }
+        );
+    }
+
+    function tradd() {
+        console.log("tradd");
+    }
+
+    function trdownload() {
+        console.log("trdownload");
+    }
+
+    function trupload() {
+        console.log("trupload");
+    }
+
+    function trclear() {
+        console.log("trclear");
+        var trlist = document.getElementById('trlist');
+        rows = trlist.rows;
+        var c=0;
+console.log("  rows.length "+rows.length);
+        for(var i=rows.length-1;i>=0;i--) {
+            if(rows[i].getAttribute('name')=='trrow') {
+console.log("  delete "+i+" th");
+                trlist.deleteRow(i);
+                c++;
+            }
+        }
+        if(c>0) {
+            console.log("MAYBE deleted");
+        }
+    }
+
+    function acupdate() {
+        console.log("acupdate");
+        start_aclist_retrieval();
+    }
+
+    function acrefresh() {
+        console.log("acrefresh");
+        acclear();
+        start_aclist_retrieval();
+    }
+
+    function _acgatherall() {
+        console.log("_acgatherall");
+        var boxes = document.getElementsByName("acitem");
+        var e;
+        var ids;
+        ids = [];
+        for(var i=0; i< boxes.length; i++) {
+            e = boxes.item(i);
+            ids.push(e.value);
+        }
+        console.log("ids ["+ids.join(":")+"]");
+        return ids;
+    }
+
+    function trrefresh() {
+        console.log("trrefresh");
+        /* clear all items */
+        start_trlist_retrieval();
+    }
+
+    function test1() {
+        console.log("test1");
+        ws.send("TRLIST");
+    }
+    function test2() {
+        console.log("test2");
+        ws.send("ACLIST");
+    }
+
+    function start_trlist_retrieval() {
+        console.log("start_trlist_retrieval");
+        if(ws == null) {
+        }
+        else {
+            ws.send("TRLIST");
+        }
+    }
+
+    function start_aclist_retrieval() {
+        console.log("start_aclist_retrieval");
+        if(ws == null) {
+        }
+        else {
+            ws.send("ACLIST");
+        }
+    }
+
+    function pro2con() {
+        if (ws == null) {
+            try {
+//                   ws = new WebSocket('@@{wsurl}');
+                var wsurl = '@@{wsurl}';
+                console.log("wsurl is "+wsurl);
+                ws = new WebSocket(wsurl);
+                ws.onopen = onopen;
+                ws.onmessage = onmessage;
+                ws.onclose = onclose;
+                ws.onerror = onerror;
+//                    setTimeout("period()", periodtick);
+                period();
+            } catch (e) {
+                var elem = document.getElementById("lastupdate");
+                elem.textContent ="Can not connect to WebSocket Server";
+                ws=null;
+            }
+        }
+    }
+
+    console.log("<p>javascript is available.");
+    try {
+        console.log("<p>kick pro2con");
+        pro2con();
+    } catch (e) {
+        document.write("<p>fail pro2con");
+    }
+
+
+    function period() {
+        var tcur = new Date();
+        console.log("period "+tcur.toString());
+        setTimeout("period()", periodtick);
+    }
+    
+    function onerror(event) {
+        console.log('WebSocket Error ' + event);
+    }
+    function onclose(event) {
+        console.log('closed');
+        ws = null;
+    }
+    function onopen () {
+        console.log("Connecting is success!!");
+        start_trlist_retrieval();
+        start_aclist_retrieval();
+    }
+
+    function onmessage (me) {
+        recievedData = me.data;
+        if(debug == 1) {
+            console.log(";;; data |"+recievedData+"|");
+        }
+        var tcur = new Date();
+
+        tobj.innerHTML = "Last refreshed on "+tcur.toString();
+
+        contents = recievedData.split(cmdsep);
+
+        switch (contents[0]){
+            case "NOP":
+                break;
+            case "PING":
+                ws.send("PONG");
+                break;
+            case "HELO":
+                ws.send("HELO-ACK");
+                break;
+            case "SYSID":
+                break;
+            case "TIME":
+                break;
+            case "TRLIST":
+                trlisthand(recievedData);
+                break;
+            case "ACLIST":
+                aclisthand(recievedData);
+                break;
+            case "RUN":
+                runhand(recievedData);
+                break;
+            default:
+                break;
+        }
+    }
+    var drawflag=0;
+    function drawing() {
+        if(drawflag==0){
+            draw();
+        }else{
+
+        }
+    }
+    function up2(val1,val2) {
+    }
+    function del2(val1) {
+    }
+    window.onload = function () {
+    };
+
+    function trlistmark(xid) {
+        console.log("trlistmark "+xid);
+        return trlisthand("TRLIST DEL "+xid);
+    }
+
+    function aclisthand(cmdarg) {
+        var fs;
+        var aclist;
+        fs = recievedData.split(cmdsep);
+        aclist = document.getElementById('aclist');
+        switch(fs[1]) {
+        case "CONT":
+            var ppp;
+            ppp = recievedData.match(/^\s*ACLIST\s*CONT\s*(.*)$/);
+//console.log(ppp);
+//console.log("P0CONT <"+ppp[0]+">");
+console.log("P1CONT <"+ppp[1]+">");
+//console.log("P2CONT <"+ppp[2]+">");
+            try {
+                var ct = JSON.parse(ppp[1]);
+            } catch(e) {
+                console.log("  fail parsing as ACLIST CONT");
+                return;
+            }
+
+            var appears = _acgatherall();
+
+            ct[0].sessions.forEach( 
+                function(x) {
+                    var xid;
+                    var xname;
+                    var xlevel;
+                    var xcount;
+                    var xlabel;
+                    xid = x.id;
+                    xname = x.name;
+                    xcount = x.count;
+                    xlevel = x.levels[0];
+//                  xlabel = x.name;
+//                  xlabel = x.name+sep+x.user+sep+x.time;
+//                  xlabel = x.time+sep+xcount;
+//                  xlabel = xlevel+" <"+xcount+"> "+x.time;
+                    xlabel = xlevel;
+
+                    if(appears.indexOf(xid)>=0) {
+                        console.log("  already appears <"+xid+"> skip");
+                    }
+                    else {
+
+                        var newtr;
+                        var newtd;
+                        newtr = aclist.insertRow(-1);
+                        newtr.setAttribute("id", xid);
+                        newtr.setAttribute("name", "acrow");
+                        newtd = newtr.insertCell(-1);
+                        newtd.innerHTML = "<input type=\"checkbox\" name=\"acitem\""+
+                            "value=\""+xid+"\" />";
+                        newtd = newtr.insertCell(-1);
+                        newtd.innerHTML = xid;
+                        newtd = newtr.insertCell(-1);
+                        newtd.innerHTML = decodeURIComponent(xlabel);
+                        newtd = newtr.insertCell(-1);
+                        newtd.innerHTML = xcount;
+                        newtd.setAttribute("align", "right");
+                        newtd = newtr.insertCell(-1);
+                        newtd.innerHTML = x.time;
+
+                    }
+                }
+            );
+
+            break;
+
+
+        case "ADD":
+            var newtr;
+            var newtd;
+            newtr = aclist.insertRow(-1);
+            newtr.setAttribute("id", fs[2]);
+            newtd = newtr.insertCell(-1);
+//              newtd.innerHTML = "<button onclick=aclistmark("+fs[2]+")></button>";
+            newtd.innerHTML = "<input type=\"checkbox\" name=\"acitem\""+
+                "value=\""+fs[2]+"\" />";
+            newtd = newtr.insertCell(-1);
+            newtd.innerHTML = fs[2];
+            newtd = newtr.insertCell(-1);
+            newtd.innerHTML = decodeURIComponent(fs[3]);
+            break;
+
+        case "DEL":
+            var oac;
+            oac = document.getElementById(fs[2]);
+            if(oac) {
+                var rows;
+                var c;
+                rows = aclist.rows;
+                c = 0;
+                for(var i=0;i<rows.length;i++) {
+                    if(oac == rows[i]) {
+                        aclist.deleteRow(i);
+                        c++;
+                        break;
+                    }
+                }
+                if(c>0) {
+                    console.log("MAYBE deleted <"+fs[2]+">");
+                }
+                else {
+                    console.log("found but FAIL delete <"+fs[2]+">");
+                }
+            }
+            else {
+                console.log("NOT-found <"+fs[2]+">");
+            }
+            break;
+        }
+    }
+
+    function runhand(cmdarg) {
+        var fs;
+        var qid;
+        var subcmd;
+//            fs = recievedData.split(cmdsep);
+        fs = cmdarg.split(cmdsep);
+        subcmd = fs[1];
+        qid = fs[2];
+        switch(subcmd) {
+        case 'START-ACK':
+            var ppp;
+            ppp = cmdarg.match(/\s*START-ACK\s+([^\s]+)\s+(.*)$/);
+console.log("P1CONT <"+ppp[2]+">");
+            try {
+                var ct = JSON.parse(ppp[2]);
+            } catch(e) {
+                console.log("  fail parsing as START-ACK");
+                return;
+            }
+
+console.log("  status "+ct[0].status);
+
+            if(ct[0].status == "SUCCESS") {
+                msgupdate("");
+                acdelifexistrnrow(qid);
+                acrefresh();
+            }
+            if(ct[0].status == "ERROR") {
+                msgupdate("ERROR "+ct[0].message);
+                acdelifexistrnrow(qid);
+            }
+            
+            break;
+
+        case 'STOP-ACK':
+            var ppp;
+            ppp = cmdarg.match(/\s*STOP-ACK\s+([^\s]+)\s+(.*)$/);
+console.log("P1CONT <"+ppp[2]+">");
+            try {
+                var ct = JSON.parse(ppp[2]);
+            } catch(e) {
+                console.log("  fail parsing as STOP-ACK");
+                return;
+            }
+
+console.log("  status "+ct[0].status);
+
+            if(ct[0].status == "SUCCESS") {
+                msgupdate("");
+//                  acdelifexistrnrow(qid);
+                acrefresh();
+            }
+            if(ct[0].status == "ERROR") {
+                msgupdate("ERROR "+ct[0].message);
+//                  acdelifexistrnrow(qid);
+            }
+            
+            acrefresh();
+            break;
+
+        }
+    }
+
+    function trlisthand(cmdarg) {
+        var fs;
+        var trlist;
+//            fs = recievedData.split(cmdsep);
+console.log("trlisthand. cmdarg <"+cmdarg+">");
+        fs = cmdarg.split(cmdsep);
+        trlist = document.getElementById('trlist');
+        switch(fs[1]) {
+
+        case "CONT":
+            var ppp;
+//                ppp = recievedData.match(/^\s*TRLIST\s*CONT\s*(.*)$/);
+            ppp = cmdarg.match(/^\s*TRLIST\s*CONT\s*(.*)$/);
+//console.log(ppp);
+//console.log("P0CONT <"+ppp[0]+">");
+console.log("P1CONT <"+ppp[1]+">");
+//console.log("P2CONT <"+ppp[2]+">");
+            try {
+                var ct = JSON.parse(ppp[1]);
+            } catch(e) {
+                console.log("  fail parsing as TRLIST CONT");
+                return;
+            }
+
+            var typear          = Array();
+            var typecat2namear  = Array();
+
+console.log("  status "+ct[0].status);
+            ct[0].types.forEach(
+                function(x) {
+                    console.log("    name '"+x.name+"'");
+                    console.log("    cat  '"+x.category+"'");
+                    typear.push(x.category);
+                    typecat2namear[x.category] = x.name;
+                }
+            );
+
+            var appears = _trgatherall();
+
+            var xcat;
+            var tname;
+            var pos;
+
+            var hacolor="#66ff66";
+            var hbcolor="#99ff99";
+
+            for(pos in typear) {
+                var ah=0;
+                var zid="dummy";
+                var sltree;
+                xcat = typear[pos];
+    /*
+    console.log("  pos  '"+pos+"'");
+    console.log("  xcat '"+xcat+"'");
+    */
+                sltree = ct[1];
+                if(!sltree[xcat]) {
+                    continue;
+                }
+
+                tname = typecat2namear[xcat];
+console.log("  xcat '"+xcat+"' tname '"+tname+"'");
+                {
+                    zid = "trA"+tmphash(tname);
+                    var newtr;
+                    var newtd;
+ah++;
+                    newtr = trlist.insertRow(-1);
+                    newtr.setAttribute("id", zid);
+                    newtr.setAttribute("name", "trArow");
+                    newtd = newtr.insertCell(-1);
+                    newtd.innerHTML = "&nbsp;";
+                    newtd = newtr.insertCell(-1);
+                    newtd.innerHTML = "&nbsp;";
+                    newtd.setAttribute("name", "trAsep");
+                    newtd.setAttribute("rowspan", 3);   // dummy
+                    newtd.setAttribute("bgcolor", hacolor);
+                    newtd = newtr.insertCell(-1);
+                    newtd.innerHTML = "&nbsp;"+tname;
+                    newtd.setAttribute("title", zid);
+                    newtd.setAttribute("colspan", 3);
+                    newtd.setAttribute("bgcolor", hacolor);
+                }
+
+                sltree[xcat].forEach(
+                    function(x) {
+                        console.log("    name "+x.name);
+                        console.log("    level length "+x.levels.length);
+
+                        {
+                            var yid;
+                            yid = "trB"+tmphash(x.name);
+                            var newtr;
+                            var newtd;
+ah++;
+ah += x.levels.length+1;
+                            newtr = trlist.insertRow(-1);
+                            newtr.setAttribute("id", yid);
+                            newtr.setAttribute("name", "trBrow");
+                            newtd = newtr.insertCell(-1);
+                            newtd.innerHTML = "&nbsp;";
+                            newtd = newtr.insertCell(-1);
+                            newtd.innerHTML = "&nbsp;";
+                            newtd.setAttribute("rowspan", x.levels.length+1);
+                            newtd.setAttribute("bgcolor", hbcolor);
+                            newtd = newtr.insertCell(-1);
+                            newtd.innerHTML = "&nbsp;"+x.name;
+                            newtd.setAttribute("bgcolor", hbcolor);
+                            newtd.setAttribute("title", yid);
+
+                        }
+
+
+                        x.levels.forEach(
+                            function(y, z, tuu) {
+                                console.log("      name "+y.name);
+                                console.log("      z    "+z);
+/*
+                                tuu[z] = this+"|"+z.toString()+"|"+y.name;
+*/
+                                tuu[z] = tname+psep+this+psep+y.name;
+                                console.log("      v    "+tuu[z]);
+
+
+                                var xid;
+                                xid = "tr"+tmphash(tuu[z]);
+
+                                if(appears.indexOf(xid)>=0) {
+                                    console.log("  already appears <"+xid+"> skip");
+                                }
+                                else {
+                                    var newtr;
+                                    var newtd;
+                                    newtr = trlist.insertRow(-1);
+                                    newtr.setAttribute("id", xid);
+                                    newtr.setAttribute("name", "trrow");
+                                    newtd = newtr.insertCell(-1);
+                                    newtd.innerHTML = "<input type=\"checkbox\" name=\"tritem\""+
+                                        "value=\""+xid+"\" />";
+
+                                    newtd = newtr.insertCell(-1);
+                                    newtd.setAttribute("name", "trlabel");
+                                    newtd.innerHTML = decodeURIComponent(y.name);
+                                    newtd.setAttribute("xurl", decodeURIComponent(tuu[z]));
+                                    newtd.setAttribute("title", xid);
+
+                                }
+                            }
+                            , x.name
+                        );
+                        {
+                            var yid;
+                            yid = "trB"+tmphash(x.name);
+                            var newtr;
+                            var newtd;
+                            newtr = trlist.insertRow(-1);
+                            newtd = newtr.insertCell(-1);
+                            newtd = newtr.insertCell(-1);
+                        }
+                    }
+                );
+
+                console.log("ah "+ah);
+                var ar;
+                ar = document.getElementById(zid);
+                if(!ar) {
+                    continue;
+                }
+console.log("found ar <"+zid+">");
+                var achs = ar.childNodes;
+                achs.forEach(
+                    function(x) {
+console.log("  x name <"+x.getAttribute("name")+">");
+                        if( x.getAttribute("name") == "trAsep") {
+console.log("found trAsep");
+                            x.setAttribute("rowspan", ah.toString());
+                        }
+                    }
+                );
+            }
+
+
+            break;
+        case "ADD":
+            var newtr;
+            var newtd;
+            newtr = trlist.insertRow(-1);
+            newtr.setAttribute("id", fs[2]);
+            newtd = newtr.insertCell(-1);
+//              newtd.innerHTML = "<button onclick=trlistmark("+fs[2]+")></button>";
+            newtd.innerHTML = "<input type=\"checkbox\" name=\"tritem\""+
+                "value=\""+fs[2]+"\" />";
+            newtd = newtr.insertCell(-1);
+            newtd.innerHTML = fs[2];
+            newtd = newtr.insertCell(-1);
+            newtd.innerHTML = decodeURIComponent(fs[3]);
+            break;
+        case "DEL":
+            var otr;
+            otr = document.getElementById(fs[2]);
+            if(otr) {
+                var rows;
+                var c;
+                rows = trlist.rows;
+                c = 0;
+                for(var i=0;i<rows.length;i++) {
+                    if(otr == rows[i]) {
+                        trlist.deleteRow(i);
+                        c++;
+                        break;
+                    }
+                }
+                if(c>0) {
+                    console.log("MAYBE deleted <"+fs[2]+">");
+                }
+                else {
+                    console.log("found but FAIL delete <"+fs[2]+">");
+                }
+            }
+            else {
+                console.log("NOT-found <"+fs[2]+">");
+            }
+            break;
+        }
+    }
+
+    if(tobj) {
+        var tcur = new Date();
+        tobj.innerHTML = "START at "+tcur.toString();
+    }
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,9 @@
+###
+### this is an example of door.pl's configuration file
+###
+#
+# comment
+#
+sweep_HTMLcontfiles .
+set_maincontfile np.html
+httpd_userpasswd nyc yankee
