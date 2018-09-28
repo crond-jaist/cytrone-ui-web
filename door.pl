@@ -4,8 +4,10 @@
 #       by k-chinen, CROND, JAIST, 2017-2018
 #
 # This program was tested with ...
-#   - Safari 11.0 and perl 5.18.2 over MacOS 10.11.6 
-#   - FireFox 52.6.0 and perl 5.10.1 over CentOS 6.9
+#   - C&S Safari 11.0 and perl 5.18.2 over MacOS 10.11.6 
+#   - C&S FireFox 52.6.0 and perl 5.10.1 over CentOS 6.9
+#   - C   FireFox 52.7.2 over CentOS 6.9
+#   - S   perl 5.22 over Ubuntu 16.04.4
 #
 #
 # Requirements: (except CyRIS installation)
@@ -28,7 +30,7 @@ $Config{useithreads} or \
     die('Recompile Perl with threads to run this program.');
 
 use strict;
-my  $versionstr = "version 0.2 <2018-Feb>";
+my  $versionstr = "version 0.3 <2018-Apr>";
 
 use Getopt::Std;
 use Sys::Syslog qw(:standard :macros);
@@ -49,17 +51,21 @@ BEGIN {
     unshift @INC, ".";
 }
 
+our $trngsrv_proto : shared;
 our $trngsrv_host : shared;
 our $trngsrv_port : shared;
 our $trngsrv_lang : shared;
 our $trngsrv_user : shared;
+#our $trngsrv_pass : shared;
 
+$trngsrv_proto = "http";
 $trngsrv_host = "127.0.0.1";
 $trngsrv_port = "8082";
 $trngsrv_lang = "en";
-$trngsrv_user = "john_doe";
+$trngsrv_user = "alice";
+#$trngsrv_pass = "rabbit";
 
-use cy0;
+use cy1;
 
 use httpd;
 import httpd;
@@ -69,8 +75,6 @@ import h32id;
 
 my $sysid = `hostname`.'_'.&h32iden(time, "r2yrmrdeHMS");
 $sysid =~ s#\n##g;
-#print "sysid $sysid\n";
-#exit 0;
 
 my $wsd_port : shared;
 my $wsd_addr : shared;
@@ -153,6 +157,7 @@ sub verify {
     printf "    WS     %-15s %-5s %s\n", $wsd_addr, $wsd_port, $wsd_url;
     printf "    httpd_droot   |$httpd_droot|\n";
     printf "back service:\n";
+    printf "    trngsrv_proto $trngsrv_proto\n";
     printf "    trngsrv_host  $trngsrv_host\n";
     printf "    trngsrv_port  $trngsrv_port\n";
     printf "    trngsrv_lang  $trngsrv_lang\n";
@@ -241,6 +246,9 @@ sub readconfigfile {
                 $wsd_port = $f[1];
             }
             #####
+            elsif($f[0] eq 'trngsrv_proto') {
+                $trngsrv_proto = $f[1];
+            }
             elsif($f[0] eq 'trngsrv_host') {
                 $trngsrv_host = $f[1];
             }
@@ -274,8 +282,9 @@ getopts('vhVD:dqmf:p:a:c:P:A:r:z', \%opt);
 
 &httpd_nodebug;
 &httpd_noauthdebug;
-&cy0_nodebug;
-&cy0_openlog;
+&cy1_nodebug;
+&cy1_openlog;
+
 
 if(defined $opt{'f'}) {
     &readconfigfile($opt{'f'});
@@ -289,7 +298,7 @@ if(defined $opt{'D'}) {
     $debug_mask .= $opt{'D'};
 }
 if($debug_mask eq 'all') {
-    $debug_mask = "main,http,httpauth,cy0,door";
+    $debug_mask = "main,http,httpauth,cy1,door";
 }
 
 
@@ -348,7 +357,7 @@ foreach my $x (@f) {
 print STDERR "debug_httpd target '$x'\n";
     if($x eq 'main')    { $debug_httpd++; }
     if($x eq 'door')    { $debug_main++; }
-    if($x eq 'cy0')     { &cy0_debug; }
+    if($x eq 'cy1')     { &cy1_debug; }
     if($x eq 'http')    { &httpd_debug; }
     if($x eq 'httpauth'){ &httpd_authdebug; }
 }
@@ -359,7 +368,17 @@ if($quiet>0) {
     &httpd_nodebug;
 }
 
-openlog("cyrisvismon", "nowait,pid", LOG_USER);
+if($trngsrv_proto =~ /\bHTTPS\b/i) {
+    cy1_useHTTPS;
+}
+elsif($trngsrv_proto =~ /\bHTTP\b/i) {
+    cy1_useHTTP;
+}
+else
+{
+}
+
+openlog("door", "nowait,pid", LOG_USER);
 syslog(LOG_INFO, "ACTION");
 
 my @mq : shared;
@@ -462,14 +481,22 @@ sub dummytrans {
 sub send_trlist {
     my ($conn) = @_;
     my $ct;
-    $ct = cy0_trlist($trngsrv_host, $trngsrv_port, $trngsrv_lang, $trngsrv_user);
+
+#print STDERR "httpd_candidate_username $httpd_candidate_username\n";
+#print STDERR "httpd_username $httpd_username\n";
+
+#    $ct = cy1_trlist($trngsrv_host, $trngsrv_port, $trngsrv_lang, $trngsrv_user);
+    my ($u, $p) = httpd_current_uppair();
+    $ct = cy1_trlist($trngsrv_host, $trngsrv_port, $trngsrv_lang, $u, $p);
     $conn->send_utf8("TRLIST CONT ".$ct->content);
 }
 
 sub send_aclist {
     my ($conn) = @_;
     my $ct;
-    $ct = cy0_aclist($trngsrv_host, $trngsrv_port, $trngsrv_lang, $trngsrv_user);
+#    $ct = cy1_aclist($trngsrv_host, $trngsrv_port, $trngsrv_lang, $trngsrv_user);
+    my ($u, $p) = httpd_current_uppair();
+    $ct = cy1_aclist($trngsrv_host, $trngsrv_port, $trngsrv_lang, $u, $p);
     $conn->send_utf8("ACLIST CONT ".$ct->content);
 }
 
@@ -490,8 +517,9 @@ sub run_training {
         $nins = 1;
     }
 
-    $ct = cy0_create($conn, "RUN START-ACK $qid", $qid,
-            $trngsrv_host, $trngsrv_port, $trngsrv_lang, $trngsrv_user,
+    my ($u, $p) = httpd_current_uppair();
+    $ct = cy1_create($conn, "RUN START-ACK $qid", $qid,
+            $trngsrv_host, $trngsrv_port, $trngsrv_lang, $u, $p,
             $tup[0], $tup[1], $tup[2], $nins);
 }
 
@@ -503,8 +531,9 @@ sub stop_training {
         print "stop_training: qid '$qid' xxxid '$xxxid'\n";
     }
 
-    $ct = cy0_end($conn, "RUN STOP-ACK $qid", $qid,
-            $trngsrv_host, $trngsrv_port, $trngsrv_lang, $trngsrv_user,
+    my ($u, $p) = httpd_current_uppair();
+    $ct = cy1_end($conn, "RUN STOP-ACK $qid", $qid,
+            $trngsrv_host, $trngsrv_port, $trngsrv_lang, $u, $p,
             $xxxid);
 
 }
@@ -694,12 +723,12 @@ while(1) {
         $last_health = $ref_time;
     }
 
-#   printf "EQ  %2d: ", $#cy0_eq;
-#   if($#cy0_eq>=0) {
+#   printf "EQ  %2d: ", $#cy1_eq;
+#   if($#cy1_eq>=0) {
 #   }
-    while($cy0_eq->pending>0) {
-        print "cy0_eq pending\n";
-        my $x = $cy0_eq->dequeue;
+    while($cy1_eq->pending>0) {
+        print "cy1_eq pending\n";
+        my $x = $cy1_eq->dequeue;
     }
 
     if(0) {

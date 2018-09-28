@@ -26,7 +26,12 @@ door.conf has following content:
 You can access the program as http://127.0.0.1:10080/ by WWW browsers.
 If you want change port, set -p and -P when you start the program.
 
-	% perl door.pl -f door.conf -p 8888 -P 9999
+	% perl doo.pl -f door.conf -p 8888 -P 9999
 
 First one is HTTP.  Second one is WebSocket.
+
+
+
+
+
 
