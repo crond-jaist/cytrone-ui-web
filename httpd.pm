@@ -209,6 +209,19 @@ sub add_contfile {
     }
 }
 
+sub deny_contfile {
+    my($fn) = @_;
+    if(defined $have_files{"/". $fn } ) {
+        undef $have_files{"/". $fn };
+        if($debug_httpd) {
+            print "deny_contfile: deleted $fn\n";
+        }
+    }
+    else {
+        print "deny_contfile: ERROR not found $fn\n";
+    }
+}
+
 sub set_maincontfile {
     my($fn) = @_;
     if( -f $fn ) {
@@ -230,8 +243,8 @@ sub dmy_start {
 }
 
 
-#openlog("cyrisvismon", "nowait,pid", LOG_USER);
-openlog("cyrisvismon", "nowait,pid", LOG_LOCAL0);
+#openlog("door", "nowait,pid", LOG_USER);
+openlog("door", "nowait,pid", LOG_LOCAL0);
 
 my %callbackdict : shared;
 my $digestpolicy : shared;
@@ -333,6 +346,20 @@ sub hasdigestauth {
 
 our %Nuptbl : shared;
 #%Nuptbl = ("abc"=>"ajapa","xyz"=>"xeon");
+our $httpd_username : shared;
+our $httpd_candidate_username : shared;
+
+$httpd_username = '';
+$httpd_candidate_username = '';
+
+sub httpd_current_uppair {
+    if($httpd_username eq '') {
+	return ('', '');
+    }
+    else {
+	return ($httpd_username, $Nuptbl{$httpd_username});
+    }
+}
 
 
 sub uptbl_numusers {
@@ -452,6 +479,7 @@ print "- - - - - |$username| - - - - -\n";
             }
             goto NOUSER;
         }
+    	$httpd_candidate_username = $username;
         $passwd = $Nuptbl{$username};
 
 if($debug_httpd_auth) {
@@ -507,12 +535,16 @@ print "pass 40\n";
             if($debug_httpd_auth) {
             print " *** SUCCESS ***\n";
             }
+	    $httpd_username = $username;
+	    $httpd_candidate_username = '';
             $rk = 0;
         }
         else {
             if($debug_httpd_auth) {
             print " *** FAIL ***\n";
             }
+	    $httpd_username = '';
+	    $httpd_candidate_username = '';
             $rk = 1;
         }
   }
@@ -725,12 +757,13 @@ our @EXPORT = qw(
     set_wsd_url
     httpd_mainbody
     sweep_HTMLcontfiles sweep_contfiles sweep_contfilesR
-    add_contfile set_maincontfile
+    add_contfile deny_contfile set_maincontfile
     httpd_debug httpd_nodebug
     httpd_authdebug httpd_noauthdebug
     set_callback list_callback
     digest_setpolicy digest_addpath digest_cleardict
     uptbl_setpair uptbl_loadfile uptbl_list uptbl_numusers
+    httpd_current_uppair
     );
 
 1;
