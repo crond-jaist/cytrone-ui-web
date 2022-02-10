@@ -487,8 +487,14 @@ sub send_trlist {
 
 #    $ct = cy1_trlist($trngsrv_host, $trngsrv_port, $trngsrv_lang, $trngsrv_user);
     my ($u, $p) = httpd_current_uppair();
+    if($debug_httpd) {
+	print "DEBUG: send_trlist(): Request params: $trngsrv_host, $trngsrv_port, $trngsrv_lang, $u, $p\n";
+    }
     $ct = cy1_trlist($trngsrv_host, $trngsrv_port, $trngsrv_lang, $u, $p);
     $conn->send_utf8("TRLIST CONT ".$ct->content);
+    if($debug_httpd) {
+	print "DEBUG: send_trlist(): Response content: " . $ct->content . "\n";
+    }
 }
 
 sub send_aclist {
@@ -496,8 +502,14 @@ sub send_aclist {
     my $ct;
 #    $ct = cy1_aclist($trngsrv_host, $trngsrv_port, $trngsrv_lang, $trngsrv_user);
     my ($u, $p) = httpd_current_uppair();
+    if($debug_httpd) {
+	print "DEBUG: send_aclist(): Request params: $trngsrv_host, $trngsrv_port, $trngsrv_lang, $u, $p\n";
+    }
     $ct = cy1_aclist($trngsrv_host, $trngsrv_port, $trngsrv_lang, $u, $p);
     $conn->send_utf8("ACLIST CONT ".$ct->content);
+    if($debug_httpd) {
+	print "DEBUG: send_aclist(): Response content: " . $ct->content . "\n";
+    }
 }
 
 sub run_training {
@@ -746,9 +758,9 @@ while(1) {
 
 NEXT2:
     if($debug_httpd) {
-        printf "MQ  %2d: ", $#mq;
-        print join(" ", @mq);
-        print "\n";
+#        printf "MQ  %2d: ", $#mq;
+#        print join(" ", @mq);
+#        print "\n";
     }
 
 NEXT:

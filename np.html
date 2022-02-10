@@ -93,51 +93,26 @@
   </script>
 </head>
 <body>
-  <div class="title"><font size="+3">CyTrONE Door</font> JAIST CROND</div>
+  <div class="title"><font size="+3">CyTrONE Web UI: Door</font></div>
+  <hr>
 
- <div>
-  <button onclick="xlayoutvert()">Vertical Layout</button>
-  <button onclick="xlayouthori()">Horizontal Layout</button>
 <!--
-  <button onclick="xtest1()">test1</button>
-  <button onclick="xtest2()">test2</button>
+  <div>
+    <button onclick="xlayouthori()">Use Horizontal Layout</button>
+    <button onclick="xlayoutvert()">Use Vertical Layout</button>
+  </div>
+  <hr>
 -->
- </div>
 
   <table id="heart" cellpadding="0px" cellspacing="0px">
   <tr>
   <td>
-   <table id="acbase" frame="box" cellpadding="4px" cellspacing="0px">
-    <tr><th>
-    Active Sessions
-    <tr><td>
-    <button onclick="xacstop()"     >End</button>
-<!--
-    <button onclick="xacaddrun()"   >**addrun</button>
-    <button onclick="xacclear()"    >clear</button>
-    <button onclick="xacupdate()"   >update</button>
--->
-    <button onclick="xacrefresh()"  >Refresh</button>
-    <tr><td>
-    <table id="aclist" bgcolor="#ccffcc" cellpadding="2" cellspacing="0">
-     <tr bgcolor="#ccccff">
-      <th><input type="checkbox" onclick="xactogglemark()" name="acall" /></th>
-      <th onclick="xacidsort()">ID</th>
-      <th onclick="xacnamesort()">Description</th>
-      <th onclick="xacnamesort()">Instances</th>
-      <th onclick="xacnamesort()">Creation Time</th>
-     </tr>
-    </table>
-    <div id="msgline" style="color: red;" />
-   </table>
 
-   &nbsp;
-
-   <table id="trbase" frame="box" cellpadding="4px" cellspacing="0px">
+   <table id="trbase" frame="box" cellpadding="5px" cellspacing="0px" align="left">
     <tr><th>
-    Training Database
+    <font size="+1">Training Content</font>
     <tr><td>
-    <button onclick="xtrrun()"      >Create</button>
+    <button onclick="xtrrun()"      >Create Session</button>
 <!--
     <button onclick="xtrdel()"      >del*</button>
     <button onclick="xtradd()"      >add*</button>
@@ -146,18 +121,45 @@
     <button onclick="xtrclear()"    >clear*</button>
     <button onclick="xtrupdate()"   >update</button>
 -->
-    <button onclick="xtrrefresh()"  >Refresh</button>
+    <button onclick="xtrrefresh()"  >Refresh Content</button>
     <tr><td>
-    <table id="trlist" bgcolor="#ccffcc" cellpadding="2" cellspacing="0">
-     <tr bgcolor="#ccccff">
+    <table id="trlist" bgcolor="#EAF0FA" cellpadding="5px" cellspacing="0px">
+     <tr name="trheader" bgcolor="#CAC4EB">
       <th><input type="checkbox" onclick="xtrtogglemark()" name="trall" /></th>
 <!--
       <th onclick="xtridsort()">id</th>
       <th onclick="xtrnamesort()">name</th>
 -->
-      <th onclick="xtrnamesort()" colspan="3">Name</th>
+      <th></th>
+      <th onclick="xtrnamesort()" align="left">Scenario Name</th>
      </tr>
     </table>
+   </table>
+
+   &nbsp;
+
+   <table id="acbase" frame="box" cellpadding="5px" cellspacing="0px" align="right">
+    <tr><th>
+    <font size="+1">Active Sessions</font>
+    <tr><td>
+    <button onclick="xacstop()"     >End Session</button>
+<!--
+    <button onclick="xacaddrun()"   >**addrun</button>
+    <button onclick="xacclear()"    >clear</button>
+    <button onclick="xacupdate()"   >update</button>
+-->
+    <button onclick="xacrefresh()"  >Refresh List</button>
+    <tr><td>
+    <table id="aclist" bgcolor="#EAF0FA" cellpadding="5px" cellspacing="0px">
+     <tr bgcolor="#CAC4EB">
+      <th><input type="checkbox" onclick="xactogglemark()" name="acall" /></th>
+      <th onclick="xacidsort()"   align="left">ID</th>
+      <th onclick="xacnamesort()" align="left">Session Name</th>
+      <th onclick="xacnamesort()" align="left">Inst. Count</th>
+      <th onclick="xacnamesort()" align="left">Creation Time</th>
+     </tr>
+    </table>
+    <div id="msgline" style="color: red;" />
    </table>
 
   </td>
@@ -175,6 +177,11 @@
     var periodtick = 10*1000;   /* 10sec */
 
     var psep = "|";
+
+    var CONTENT_HEADER_COLOR = "#CAC4EB"; // used in HTML code
+    var CONTENT_TOP_COLOR = "#C4D2EB"; // "#66ff66"; // not used
+    var CONTENT_SCENARIO_COLOR = "#C4D2EB"; // "#99ff99"
+    var CONTENT_LEVEL_COLOR = "#EAF0FA"; // used in HTML code
 
     console.log("np starting...");
 
@@ -204,15 +211,15 @@
         console.log("layout horizontal");
         var xal = document.getElementById("acbase");
         var xtr = document.getElementById("trbase");
-        xal.setAttribute("align", "left");
-        xtr.setAttribute("align", "right");
+        xtr.setAttribute("align", "left");
+        xal.setAttribute("align", "right");
     }
     function layoutvert() {
         console.log("layout vertical");
         var xal = document.getElementById("acbase");
         var xtr = document.getElementById("trbase");
-        xal.setAttribute("align", "");
         xtr.setAttribute("align", "");
+        xal.setAttribute("align", "");
     }
 
     function acmarkall() {
@@ -306,7 +313,12 @@
             }
         }
         console.log("ids ["+ids.join(":")+"]");
-        
+
+	if (ids.length==0) {
+	    alert("ERROR: Cannot end session because no session is selected!");
+	    return;
+	}
+
         ids.forEach(
             function(x) {
                 console.log("  id <"+x+">");
@@ -436,27 +448,30 @@ console.log("  delete "+i+" th");
         newtd = newtr.insertCell(-1);
         newtd.innerHTML = rid;
         newtd = newtr.insertCell(-1);
-        newtd.innerHTML = "just starting...";
+        newtd.innerHTML = "Starting session...";
     }
 
-    var ridseq=4071;
+    var ridseq=0;
     function _trrunX(tup, cc) {
         var entup = encodeURIComponent(tup);
         console.log("_trrunX with +'"+entup+"'");
         ridseq++;
-        var rid="rn"+ridseq;
+        var rid="TMP"+ridseq;
         acaddrun(rid);
         ws.send("RUN START "+rid+" "+entup+" "+cc);
     }
 
     function trrun() {
         console.log("trrun");
+        var ids = _trgathertarget();
+	if (ids.length==0) {
+	    alert("ERROR: Cannot create session because no scenario is selected!");
+	    return;
+	}
 
-        var cc=prompt("How many instance ?", "1");
-
+        var cc=prompt("Enter the number of instances to create:", "1");
         if(!cc) return;
 
-        var ids = _trgathertarget();
         ids.forEach(
             function(x) {
                 console.log(" run? <"+x+">");
@@ -506,10 +521,10 @@ console.log("  delete "+i+" th");
         var trlist = document.getElementById('trlist');
         rows = trlist.rows;
         var c=0;
-console.log("  rows.length "+rows.length);
+	console.log("  rows.length "+rows.length);
         for(var i=rows.length-1;i>=0;i--) {
-            if(rows[i].getAttribute('name')=='trrow') {
-console.log("  delete "+i+" th");
+            if(rows[i].getAttribute('name')!='trheader') { //=='trrow') {
+		console.log("  delete "+i+" th");
                 trlist.deleteRow(i);
                 c++;
             }
@@ -546,7 +561,8 @@ console.log("  delete "+i+" th");
 
     function trrefresh() {
         console.log("trrefresh");
-        /* clear all items */
+        /* clear all items first */
+	trclear();
         start_trlist_retrieval();
     }
 
@@ -633,7 +649,7 @@ console.log("  delete "+i+" th");
         }
         var tcur = new Date();
 
-        tobj.innerHTML = "Last refreshed on "+tcur.toString();
+        tobj.innerHTML = "<hr><i>Last refreshed on "+tcur.toString()+"</i>";
 
         contents = recievedData.split(cmdsep);
 
@@ -741,9 +757,9 @@ console.log("P1CONT <"+ppp[1]+">");
                         newtd.innerHTML = decodeURIComponent(xlabel);
                         newtd = newtr.insertCell(-1);
                         newtd.innerHTML = xcount;
-                        newtd.setAttribute("align", "right");
+                        //newtd.setAttribute("align", "right");
                         newtd = newtr.insertCell(-1);
-                        newtd.innerHTML = x.time;
+                        newtd.innerHTML = "<i>"+x.time+"</i>";
 
                     }
                 }
@@ -863,7 +879,7 @@ console.log("  status "+ct[0].status);
         var fs;
         var trlist;
 //            fs = recievedData.split(cmdsep);
-console.log("trlisthand. cmdarg <"+cmdarg+">");
+	console.log("trlisthand. cmdarg <"+cmdarg+">");
         fs = cmdarg.split(cmdsep);
         trlist = document.getElementById('trlist');
         switch(fs[1]) {
@@ -902,8 +918,8 @@ console.log("  status "+ct[0].status);
             var tname;
             var pos;
 
-            var hacolor="#66ff66";
-            var hbcolor="#99ff99";
+            var hacolor=CONTENT_TOP_COLOR; // not used
+            var hbcolor=CONTENT_SCENARIO_COLOR;
 
             for(pos in typear) {
                 var ah=0;
@@ -920,12 +936,15 @@ console.log("  status "+ct[0].status);
                 }
 
                 tname = typecat2namear[xcat];
-console.log("  xcat '"+xcat+"' tname '"+tname+"'");
+		console.log("  xcat '"+xcat+"' tname '"+tname+"'");
+		/* Since only scenario-based training is supported, we
+		 skip displaying the training type row */
+		/*
                 {
                     zid = "trA"+tmphash(tname);
                     var newtr;
                     var newtd;
-ah++;
+		    ah++;
                     newtr = trlist.insertRow(-1);
                     newtr.setAttribute("id", zid);
                     newtr.setAttribute("name", "trArow");
@@ -942,6 +961,7 @@ ah++;
                     newtd.setAttribute("colspan", 3);
                     newtd.setAttribute("bgcolor", hacolor);
                 }
+		*/
 
                 sltree[xcat].forEach(
                     function(x) {
@@ -953,8 +973,8 @@ ah++;
                             yid = "trB"+tmphash(x.name);
                             var newtr;
                             var newtd;
-ah++;
-ah += x.levels.length+1;
+			    ah++;
+			    ah += x.levels.length+1;
                             newtr = trlist.insertRow(-1);
                             newtr.setAttribute("id", yid);
                             newtr.setAttribute("name", "trBrow");
@@ -965,10 +985,9 @@ ah += x.levels.length+1;
                             newtd.setAttribute("rowspan", x.levels.length+1);
                             newtd.setAttribute("bgcolor", hbcolor);
                             newtd = newtr.insertCell(-1);
-                            newtd.innerHTML = "&nbsp;"+x.name;
+                            newtd.innerHTML = "<i>"+x.name+"</i>&nbsp;&nbsp;";
                             newtd.setAttribute("bgcolor", hbcolor);
                             newtd.setAttribute("title", yid);
-
                         }
 
 

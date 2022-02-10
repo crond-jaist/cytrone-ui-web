@@ -26,6 +26,8 @@ use threads;
 use threads::shared;
 use Thread::Queue;
 
+use Encode qw(decode_utf8);
+
 our @EXPORT = qw(cy1_trlist cy1_aclist cy1_example cy1_create cy1_end cy1_nodebug cy1_debug cy1_openlog cy1_useHTTP cy1_useHTTPS $cy1_eq);
 
 my $debug = 0;
@@ -76,6 +78,9 @@ sub cy1_trlist {
     $ua = LWP::UserAgent->new;
     $res = $ua->post($url, \%form);
 
+    if($debug) {
+	print "DEBUG: cy1_trlist(): Response content: " . $res->content . "\n";
+    }
     return $res;
 }
 
@@ -164,6 +169,11 @@ sub _base {
 
     _info("INFO _base $pmode START $majorid $minorid $cparam");
     $ts = time;
+    # Special handling for fields that could contain Japanese characters,
+    # since otherwise Python side doesn't handle them correctly
+    $form{'type'}=decode_utf8($form{'type'});
+    $form{'scenario'}=decode_utf8($form{'scenario'});
+    $form{'level'}=decode_utf8($form{'level'});
     $res = $ua->post($url, \%form);
     $te = time;
     _info("INFO _base $pmode END   $majorid $minorid");
