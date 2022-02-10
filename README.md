@@ -12,11 +12,11 @@ Technology ([JAIST](https://www.jaist.ac.jp/english/)).
 
 A screenshot of the web interface is shown in the figure below. In the
 left-hand side panel existing training content is displayed, and the
-*Create Session* button can be used to create a new training session
+**Create Session** button can be used to create a new training session
 (the number of requested cyber range instances should be set via the
 dialog box shown subsequently). The right-hand side panel displays the
 active training sessions, and can be used to terminate them via the
-*End Session* button. Both the training content and active sessions
+**End Session** button. Both the training content and active sessions
 panels can be refreshed by clicking the corresponding buttons in case
 the data was updated externally (e.g., new content was added to
 CyTrONE while the UI was running).
@@ -72,8 +72,8 @@ provided in `door.conf.dist`; the key settings are explained below:
   httpd_userpasswd    cy_user cy_passwd
   ```
   Note that the user name and password specified here are also used to
-  authenticate with CyTrONE, so these values must match those of the
-  CyTrONE server.
+  authenticate with CyTrONE, so these values must match those set for
+  the CyTrONE server.
 
 * Configure the settings used when the UI connects to the CyTrONE
   server; for example, to use the `https` protocol to connect locally
@@ -86,9 +86,9 @@ provided in `door.conf.dist`; the key settings are explained below:
   ```
 
 Depending on the configuration of the SSL server certificate for your
-CyTrONE server, such as when using self-signed certificates, you may
-also need to disable the host name verification in the Perl SSL
-implementation via the following command:
+CyTrONE server, such as in the case of using self-signed certificates,
+you may also need to disable the host name verification in the Perl
+SSL implementation via the following command:
 ```
 $ export PERL_LWP_SSL_VERIFY_HOSTNAME=0
 ```
