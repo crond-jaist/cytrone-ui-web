@@ -1,0 +1,17 @@
+
+CyTrONE Web UI v0.4
+-------------------
+* Added error handling for the case when create/end buttons are
+  pressed before selecting a scenario/session
+* Updated/streamlined the look of the UI
+* Fixed issue with refreshing training content that caused incorrect
+  information to be shown
+* Made possible display of Japanese language content, which used to
+  cause an internal error before
+* Minor bug fixes and improvements
+
+CyTrONE Web UI v0.3
+-------------------
+* First public release of the web browser user interface for the
+  integrated cybersecurity trainig framework CyTrONE. This release
+  includes support for HTTPS when communicating with the framework.
