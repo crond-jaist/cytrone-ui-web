@@ -4,21 +4,22 @@ CyTrONE Web UI is a web browser user interface for the integrated
 cybersecurity training framework
 [CyTrONE](https://github.com/crond-jaist/cytrone). The interface is
 intended for training instructors, who can use it to create new
-training sessions and to stop existing ones. CyTrONE Web UI is being
-developed by the Cyber Range Organization and Design (CROND)
+training sessions and to terminate existing ones. CyTrONE Web UI is
+being developed by the Cyber Range Organization and Design
+([CROND](https://www.jaist.ac.jp/misc/crond/index-en.html))
 NEC-endowed chair at the Japan Advanced Institute of Science and
-Technology (JAIST).
+Technology ([JAIST](https://www.jaist.ac.jp/english/)).
 
 A screenshot of the web interface is shown in the figure below. In the
 left-hand side panel existing training content is displayed, and the
-"Create Session" button can be used to create a new session (the
-number of required cyber range instances should be set via the dialog
-box shown subsequently). The right-hand side panel displays the active
-training sessions, and can be used to stop them via the "End Session"
-button. Both the training content and active sessions panels can be
-refreshed by clicking the corresponding buttons in case the data was
-updated (e.g., new content was added to CyTrONE while the UI was
-running).
+*Create Session* button can be used to create a new training session
+(the number of requested cyber range instances should be set via the
+dialog box shown subsequently). The right-hand side panel displays the
+active training sessions, and can be used to terminate them via the
+*End Session* button. Both the training content and active sessions
+panels can be refreshed by clicking the corresponding buttons in case
+the data was updated externally (e.g., new content was added to
+CyTrONE while the UI was running).
 
 ![CyTrONE Web UI Screenshot](web_ui_screenshot.png)
 
@@ -30,7 +31,7 @@ release](https://github.com/crond-jaist/cytrone-ui-web/releases/tag/v0.3).
 
 ## Prerequisites
 
-CyTrONE Web UI had been developed using the Perl programming language
+CyTrONE Web UI has been developed using the Perl programming language
 on Ubuntu 18.04 LTS, so installing Perl is required if it is not
 installed already. To do that, run the following command:
 ```
@@ -50,56 +51,59 @@ follows:
 
 ## Setup
 
-While there is no installation procedure for the CyTrONE Web UI,
-configuring its settings is necessary. This is accomplished by
-creating a configuration file based on the template provided in
-`door.conf.dist` and changing the settings according to your
-environment. The key settings are explained below:
+While there is no installation procedure for CyTrONE Web UI, changing
+its settings according to your environment is necessary. This is
+accomplished by creating a configuration file based on the template
+provided in `door.conf.dist`; the key settings are explained below:
+
 * Configure the address and port on which the UI will listen for web
   browser connections; for example, to make possible connecting via
-  `http://192.168.1.1:8080`, you should have the following settings:
+  `http://192.168.1.1:8080`, you should specify the following
+  settings:
   ```
   httpd_addr    192.168.1.1
   httpd_port    8080
   ```
+
 * Configure the user name and password for connecting to the web UI;
   for example, to make possible connecting via the user `cy_user` and
-  password `cy_passwd`, you should have the following settings:
+  password `cy_passwd`, you should specify the following settings:
   ```
   httpd_userpasswd    cy_user cy_passwd
   ```
-  Note that the user name and password here are also used to
-  authenticate with CyTrONE, so the setting must match the settings
-  for the CyTrONE server.
+  Note that the user name and password specified here are also used to
+  authenticate with CyTrONE, so these values must match those of the
+  CyTrONE server.
+
 * Configure the settings used when the UI connects to the CyTrONE
   server; for example, to use the `https` protocol to connect locally
-  (assuming the UI and CyTrONE are installed on the same host) and
-  retrieve English language content, use the following settings:
+  (assuming the UI and CyTrONE are installed on the same host), and
+  to retrieve English language content, use the following settings:
   ```
   trngsrv_proto    https
   trngsrv_host     127.0.0.1
   trngsrv_lang     en
   ```
 
-Depending on the configuration of the server certificate for your
+Depending on the configuration of the SSL server certificate for your
 CyTrONE server, such as when using self-signed certificates, you may
-also need to disable the host name verification in Perl SSL
+also need to disable the host name verification in the Perl SSL
 implementation via the following command:
 ```
-$ export PERL_LWP_SSL_VERIFY_HOSTNAM
+$ export PERL_LWP_SSL_VERIFY_HOSTNAME=0
 ```
 
 
 ## Quick Start
 
-In order to start the CyTrONE Web UI, run the command below (assuming
-that the configuration file you created above is named `door.conf`:
+In order to start CyTrONE Web UI, run the command below (assuming that
+the configuration file you created above is named `door.conf`):
 ```
 $ perl door.pl -f door.conf
 ```
 
-The UI program can be stopped simply by using `Ctrl-C` in the terminal
-where it was started.
+The UI program can be stopped simply by entering `Ctrl-C` in the
+terminal where it was started.
 
 All the available command-line options can be viewed using the
 argument `-h` when running the program:
