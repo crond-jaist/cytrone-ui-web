@@ -1,9 +1,11 @@
-###
-### this is an example of door.pl's configuration file
-###
-#
-# comment
-#
-sweep_HTMLcontfiles .
-set_maincontfile np.html
-httpd_userpasswd nyc yankee
+# Example configuration file for door.pl
+
+httpd_addr 127.0.0.1
+httpd_port 10080
+wsd_addr 127.0.0.1
+
+httpd_userpasswd alice rabbit
+
+trngsrv_proto http
+trngsrv_host 127.0.0.1
+trngsrv_lang en
