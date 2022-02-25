@@ -102,6 +102,8 @@ my $waitclient=0;
 
 my $httpd_droot="htmldoc";
 
+my $maincontfile="np.html";
+
 select STDOUT;
 $| = 1;
 
@@ -285,6 +287,8 @@ getopts('vhVD:dqmf:p:a:c:P:A:r:z', \%opt);
 &cy1_nodebug;
 &cy1_openlog;
 
+# Set default value for main content file
+&set_maincontfile($maincontfile);
 
 if(defined $opt{'f'}) {
     &readconfigfile($opt{'f'});
