@@ -53,8 +53,9 @@ follows:
 
 While there is no installation procedure for CyTrONE Web UI, changing
 its settings according to your environment is necessary. This is
-accomplished by creating a configuration file based on the template
-provided in `door.conf.dist`; the key settings are explained below:
+accomplished by creating a configuration file based on the sample
+provided in `door.conf.dist`. The settings included in this sample are
+explained below:
 
 * Configure the address and port on which the UI will listen for web
   browser connections; for example, to make possible connecting via
@@ -63,6 +64,7 @@ provided in `door.conf.dist`; the key settings are explained below:
   ```
   httpd_addr    192.168.1.1
   httpd_port    8080
+  wsd_addr      192.168.1.1
   ```
 
 * Configure the user name and password for connecting to the web UI;
