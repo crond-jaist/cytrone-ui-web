@@ -93,7 +93,7 @@
   </script>
 </head>
 <body>
-  <div class="title"><font size="+3">CyTrONE Web UI: Door</font></div>
+  <div class="title"><font size="+3">CyTrONE Web UI &ndash; Door</font></div>
   <hr>
 
 <!--
@@ -112,7 +112,7 @@
     <tr><th>
     <font size="+1">Training Content</font>
     <tr><td>
-    <button onclick="xtrrun()"      >Create Session</button>
+    <button onclick="xtrrun()"      >Create Training</button>
 <!--
     <button onclick="xtrdel()"      >del*</button>
     <button onclick="xtradd()"      >add*</button>
@@ -131,7 +131,7 @@
       <th onclick="xtrnamesort()">name</th>
 -->
       <th></th>
-      <th onclick="xtrnamesort()" align="left">Scenario Name</th>
+      <th onclick="xtrnamesort()" align="left">Category &amp; Name</th>
      </tr>
     </table>
    </table>
@@ -140,9 +140,9 @@
 
    <table id="acbase" frame="box" cellpadding="5px" cellspacing="0px" align="right">
     <tr><th>
-    <font size="+1">Active Sessions</font>
+    <font size="+1">Ongoing Activities</font>
     <tr><td>
-    <button onclick="xacstop()"     >End Session</button>
+    <button onclick="xacstop()"     >End Training</button>
 <!--
     <button onclick="xacaddrun()"   >**addrun</button>
     <button onclick="xacclear()"    >clear</button>
@@ -153,9 +153,9 @@
     <table id="aclist" bgcolor="#EAF0FA" cellpadding="5px" cellspacing="0px">
      <tr bgcolor="#CAC4EB">
       <th><input type="checkbox" onclick="xactogglemark()" name="acall" /></th>
-      <th onclick="xacidsort()"   align="left">ID</th>
-      <th onclick="xacnamesort()" align="left">Session Name</th>
-      <th onclick="xacnamesort()" align="left">Inst. Count</th>
+      <th onclick="xacidsort()"   align="center">ID</th>
+      <th onclick="xacnamesort()" align="left">Name</th>
+      <th onclick="xacnamesort()" align="center">Instances</th>
       <th onclick="xacnamesort()" align="left">Creation Time</th>
      </tr>
     </table>
@@ -315,7 +315,7 @@
         console.log("ids ["+ids.join(":")+"]");
 
 	if (ids.length==0) {
-	    alert("ERROR: Cannot end session because no session is selected!");
+	    alert("ERROR: Cannot end training because no activity is selected!");
 	    return;
 	}
 
@@ -448,7 +448,7 @@ console.log("  delete "+i+" th");
         newtd = newtr.insertCell(-1);
         newtd.innerHTML = rid;
         newtd = newtr.insertCell(-1);
-        newtd.innerHTML = "Starting session...";
+        newtd.innerHTML = "Creating activity...";
     }
 
     var ridseq=0;
@@ -465,7 +465,7 @@ console.log("  delete "+i+" th");
         console.log("trrun");
         var ids = _trgathertarget();
 	if (ids.length==0) {
-	    alert("ERROR: Cannot create session because no scenario is selected!");
+	    alert("ERROR: Cannot create activity because no scenario is selected!");
 	    return;
 	}
 
@@ -753,11 +753,12 @@ console.log("P1CONT <"+ppp[1]+">");
                             "value=\""+xid+"\" />";
                         newtd = newtr.insertCell(-1);
                         newtd.innerHTML = xid;
+                        newtd.setAttribute("align", "center");
                         newtd = newtr.insertCell(-1);
                         newtd.innerHTML = decodeURIComponent(xlabel);
                         newtd = newtr.insertCell(-1);
                         newtd.innerHTML = xcount;
-                        //newtd.setAttribute("align", "right");
+                        newtd.setAttribute("align", "center");
                         newtd = newtr.insertCell(-1);
                         newtd.innerHTML = "<i>"+x.time+"</i>";
 
@@ -838,12 +839,13 @@ console.log("  status "+ct[0].status);
                 msgupdate("");
                 acdelifexistrnrow(qid);
                 acrefresh();
+                alert(unescape(ct[0].message)); // Show CyTrONE notification after creation
             }
             if(ct[0].status == "ERROR") {
-                msgupdate("ERROR "+ct[0].message);
+                msgupdate("ERROR: "+ct[0].message);
                 acdelifexistrnrow(qid);
             }
-            
+
             break;
 
         case 'STOP-ACK':
@@ -865,7 +867,7 @@ console.log("  status "+ct[0].status);
                 acrefresh();
             }
             if(ct[0].status == "ERROR") {
-                msgupdate("ERROR "+ct[0].message);
+                msgupdate("ERROR: "+ct[0].message);
 //                  acdelifexistrnrow(qid);
             }
             
