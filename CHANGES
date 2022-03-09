@@ -1,4 +1,11 @@
 
+CyTrONE Web UI v0.5
+-------------------
+* Updated some UI text elements to match the language used in CyTrONE
+  and CYLMS
+* Added display of the CyTrONE notification with cyber range access
+  information after the cyber range is created
+
 CyTrONE Web UI v0.4
 -------------------
 * Added error handling for the case when create/end buttons are
